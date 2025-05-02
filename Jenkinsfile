@@ -16,6 +16,13 @@ pipeline {
                 }
             }
         }
+        stage('Dependency Check') {
+            steps {
+                container('nodejs'){
+                    sh 'npm audit --audit-level=critical'
+                }
+            }
+        }
         // stage('test Kaniko') {
         //     steps {
         //         container('kaniko') {
