@@ -8,28 +8,25 @@ pipeline {
         }
     }
     stages {
-        stage('Test npm') {
+        stage('Install App Dependencies') {
             steps {
                 container('nodejs'){
-                    sh 'npm -v'
-                    sh "pwd"
-                    sh "ls -R"
-                    sh "ls -R /home/jenkins/agent"
-                    // sh "ls -R /app"
+                    sh 'npm install --no-audit'
+                    sh 'ls -la'
                 }
             }
         }
-        stage('test Kaniko') {
-            steps {
-                container('kaniko') {
-                    sh """
-                    /kaniko/executor \
-                    --dockerfile=Dockerfile \
-                    --context=`pwd` \
-                    --destination=docker.io/anas1243/solar-app:latest
-                    """
-                }
-            }
-        }
+        // stage('test Kaniko') {
+        //     steps {
+        //         container('kaniko') {
+        //             sh """
+        //             /kaniko/executor \
+        //             --dockerfile=Dockerfile \
+        //             --context=`pwd` \
+        //             --destination=docker.io/anas1243/solar-app:latest
+        //             """
+        //         }
+        //     }
+        // }
     }
 }
