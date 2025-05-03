@@ -23,6 +23,15 @@ pipeline {
                 }
             }
         }
+        stage('OWASP DepCheck') {
+            steps {
+                dependencyCheck additionalArguments: '''
+                    --scan \'./\'
+                    --out \'./\'
+                    --format \'ALL\'
+                    --prettyPrint''', odcInstallation: 'owasp-depCheck-12'
+            }
+        }
         // stage('test Kaniko') {
         //     steps {
         //         container('kaniko') {
