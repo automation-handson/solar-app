@@ -32,8 +32,8 @@ pipeline {
                             --out \'./\'
                             --format \'ALL\'
                             --prettyPrint''', nvdCredentialsId: 'owasp-key', odcInstallation: 'owasp-depCheck-12'
-                            dependencyCheckPublisher failedTotalCritical: 1, pattern: '/home/jenkins/agent/workspace/handson_solar-app_feature_feat-4/dependency-check-report.xml', stopBuild: true
-                            archiveArtifacts artifacts: '/home/jenkins/agent/workspace/handson_solar-app_feature_feat-4/dependency-check-jenkins.html', followSymlinks: false
+                            dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: true
+                            archiveArtifacts artifacts: 'dependency-check-jenkins.html', followSymlinks: false
                         }
                     }
             }
