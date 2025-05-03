@@ -29,7 +29,7 @@ pipeline {
                     --scan \'./\'
                     --out \'./\'
                     --format \'ALL\'
-                    --prettyPrint''', odcInstallation: 'owasp-depCheck-12'
+                    --prettyPrint''', nvdCredentialsId: 'owasp-key', odcInstallation: 'owasp-depCheck-12'
             }
         }
         // stage('test Kaniko') {
