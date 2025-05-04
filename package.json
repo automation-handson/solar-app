@@ -16,13 +16,13 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.2",
-    "mocha-junit-reporter": "^2.2.1",
+    "mocha-junit-reporter": "^2.0.0",
     "mongoose": "8.14.1",
     "nyc": "^15.1.0"
   },
   "devDependencies": {
-    "chai": "*",
-    "chai-http": "*",
-    "mocha": "*"
+    "chai": "5.2.0",
+    "chai-http": "^5.1.2",
+    "mocha": "11.2.2"
   }
 }
