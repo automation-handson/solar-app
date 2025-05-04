@@ -17,10 +17,26 @@ pipeline {
             }
         }
         stage('Dependency Check') {
-            steps {
-                container('nodejs'){
-                    sh 'npm audit --audit-level=critical'
-                }
+            parallel {
+                     stage('NMP Dependency Check') {
+                        steps {
+                            container('nodejs'){
+                                sh 'npm audit --audit-level=critical'
+                            }
+                        }
+                    }
+                    // commented out as it takes a long time to run
+                    // stage('OWASP Dependency Check') {
+                    //     steps {
+                    //         dependencyCheck additionalArguments: '''
+                    //         --scan \'./\'
+                    //         --out \'./\'
+                    //         --format \'ALL\'
+                    //         --prettyPrint''', nvdCredentialsId: 'owasp-key', odcInstallation: 'owasp-depCheck-12'
+                    //         dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: true
+                    //         archiveArtifacts artifacts: 'dependency-check-jenkins.html', followSymlinks: false
+                    //     }
+                    // }
             }
         }
         // stage('test Kaniko') {
