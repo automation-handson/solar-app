@@ -34,9 +34,18 @@ pipeline {
                     //         --format \'ALL\'
                     //         --prettyPrint''', nvdCredentialsId: 'owasp-key', odcInstallation: 'owasp-depCheck-12'
                     //         dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: true
+                               // export also the junit.xml file to be visible in Jenkins test tab in blue ocean
+                    //         junit testResults: 'dependency-check-junit.xml'
                     //         archiveArtifacts artifacts: 'dependency-check-jenkins.html', followSymlinks: false
                     //     }
                     // }
+            }
+        }
+        stage('NMP Test') {
+            steps {
+                container('nodejs'){
+                    sh 'npm test'
+                }
             }
         }
         // stage('test Kaniko') {
