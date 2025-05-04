@@ -27,13 +27,15 @@ pipeline {
                     }
                     stage('OWASP Dependency Check') {
                         steps {
-                            dependencyCheck additionalArguments: '''
-                            --scan \'./\'
-                            --out \'./\'
-                            --format \'ALL\'
-                            --prettyPrint''', nvdCredentialsId: 'owasp-key', odcInstallation: 'owasp-depCheck-12'
-                            dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: true
-                            archiveArtifacts artifacts: 'dependency-check-jenkins.html', followSymlinks: false
+                            container('nodejs'){
+                                dependencyCheck additionalArguments: '''
+                                --scan \'./\'
+                                --out \'./\'
+                                --format \'ALL\'
+                                --prettyPrint''', nvdCredentialsId: 'owasp-key', odcInstallation: 'owasp-depCheck-12'
+                                dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: true
+                                archiveArtifacts artifacts: 'dependency-check-jenkins.html', followSymlinks: false
+                            }
                         }
                     }
             }
