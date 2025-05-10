@@ -44,7 +44,11 @@ pipeline {
         stage('NMP Test') {
             steps {
                 container('nodejs'){
-                    sh 'npm test'
+                    withCredentials([usernamePassword(credentialsId: 'mongo-cred', passwordVariable: 'MONGO_PASSWORD', usernameVariable: 'MONGO_USERNAME')]) {
+                        withEnv(['MONGO_URI=mongodb://$MONGO_USERNAME:$MONGO_PASSWORD@mongodb.mongodb.svc.cluster.local:27017/solar-system?authSource=solar-system']) {
+                            sh 'npm test'
+                        }
+                    }
                 }
             }
         }
