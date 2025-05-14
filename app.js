@@ -11,20 +11,23 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '/')));
 app.use(cors())
 
-
+// mongoose.connect(process.env.MONGO_URI, {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+// }, function(err) {
+//     if (err) {
+//         console.log("error!! " + err)
+//     } else {
+//       //  console.log("MongoDB Connection Successful")
+//     }
+// })
 
 mongoose.connect(process.env.MONGO_URI, {
-    user: process.env.MONGO_USERNAME,
-    pass: process.env.MONGO_PASSWORD,
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}, function(err) {
-    if (err) {
-        console.log("error!! " + err)
-    } else {
-      //  console.log("MongoDB Connection Successful")
-    }
-})
+}).then(() => {
+    console.log("MongoDB Connection Successful");
+}).catch((err) => {
+    console.error("Error connecting to MongoDB:", err);
+});
 
 var Schema = mongoose.Schema;
 
@@ -40,19 +43,32 @@ var planetModel = mongoose.model('planets', dataSchema);
 
 
 
-app.post('/planet',   function(req, res) {
-   // console.log("Received Planet ID " + req.body.id)
-    planetModel.findOne({
-        id: req.body.id
-    }, function(err, planetData) {
-        if (err) {
-            alert("Ooops, We only have 9 planets and a sun. Select a number from 0 - 9")
-            res.send("Error in Planet Data")
-        } else {
-            res.send(planetData);
+// app.post('/planet',   function(req, res) {
+//    // console.log("Received Planet ID " + req.body.id)
+//     planetModel.findOne({
+//         id: req.body.id
+//     }, function(err, planetData) {
+//         if (err) {
+//             alert("Ooops, We only have 9 planets and a sun. Select a number from 0 - 9")
+//             res.send("Error in Planet Data")
+//         } else {
+//             res.send(planetData);
+//         }
+//     })
+// })
+
+app.post('/planet', async (req, res) => {
+    try {
+        const planet = await planetModel.findOne({ id: req.body.id });
+        if (!planet) {
+            return res.status(404).send({ message: 'Planet not found' });
         }
-    })
-})
+        res.status(200).send(planet);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send({ message: 'Internal Server Error' });
+    }
+});
 
 app.get('/',   async (req, res) => {
     res.sendFile(path.join(__dirname, '/', 'index.html'));

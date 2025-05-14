@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017" # Expose MongoDB on port 27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: admin
+    volumes:
+      - mongo-data:/data/db # Persist MongoDB data
+
+  node:
+    image: node:18-alpine3.17
+    ports:
+      - "3000:3000" # Expose Node.js app on port 3000
+    environment:
+      MONGO_URI: mongodb://root:example@mongo:27017/solar-system?authSource=admin
+    volumes:
+      - ./:/app
+    depends_on:
+      - mongo # Ensure MongoDB starts before the app
+    entrypoint:
+      - "sleep" 
+    command:
+      - "1d"
+volumes:
+  mongo-data:

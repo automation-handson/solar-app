@@ -3,7 +3,7 @@ kind: Pod
 spec:
   containers:
   - name: nodejs
-    image: node:22
+    image: node:18-alpine3.17
     command:
     - cat
     tty: true

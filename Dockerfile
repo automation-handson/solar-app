@@ -1,20 +1,12 @@
-# Stage 1: Build and Test
-FROM node:22 AS build
+# Use the official Node.js image as the base image, specifying the Node.js version
+FROM node:8.11.3
+
+# Install npm 6.1.0 globally
+RUN npm install -g npm@6.1.0
+
+# Set the working directory
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm install
-COPY . .
-
-# Stage 2: Production Image
-FROM node:22
-WORKDIR /app
-COPY --from=build /app .
-
-
-ENV MONGO_URI=uriPlaceholder
-ENV MONGO_USERNAME=usernamePlaceholder
-ENV MONGO_PASSWORD=passwordPlaceholder
 
 EXPOSE 3000
-
-CMD ["npm", "start"]
+# Keep the container running indefinitely
+CMD ["tail", "-f", "/dev/null"]
