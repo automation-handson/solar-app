@@ -34,9 +34,30 @@ pipeline {
                     //         --format \'ALL\'
                     //         --prettyPrint''', nvdCredentialsId: 'owasp-key', odcInstallation: 'owasp-depCheck-12'
                     //         dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: true
+                               // export also the junit.xml file to be visible in Jenkins test tab in blue ocean
+                    //         junit testResults: 'dependency-check-junit.xml'
                     //         archiveArtifacts artifacts: 'dependency-check-jenkins.html', followSymlinks: false
                     //     }
                     // }
+            }
+        }
+        stage('NPM Test') {
+            steps {
+                container('nodejs') {
+                    withCredentials([usernamePassword(credentialsId: 'mongo-cred', passwordVariable: 'MONGO_PASSWORD', usernameVariable: 'MONGO_USERNAME')]) {
+                        withEnv(["MONGO_URI=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongodb.mongodb.svc.cluster.local:27017/solar-system?authSource=solar-system"]) {
+                            sh 'npm test'
+
+                        }
+                    }
+                }
+            }
+            post {
+                always {
+                    // Archive test results regardless of success or failure
+                    archiveArtifacts allowEmptyArchive: true, artifacts: 'test-results.xml', followSymlinks: false
+                    junit 'test-results.xml' // Publish test results to Jenkins Test Results tab
+                }
             }
         }
         // stage('test Kaniko') {
