@@ -41,10 +41,22 @@ pipeline {
                     // }
             }
         }
-        stage('NMP Test') {
+        stage('NPM Test') {
             steps {
-                container('nodejs'){
-                    sh 'npm test'
+                container('nodejs') {
+                    withCredentials([usernamePassword(credentialsId: 'mongo-cred', passwordVariable: 'MONGO_PASSWORD', usernameVariable: 'MONGO_USERNAME')]) {
+                        withEnv(["MONGO_URI=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongodb.mongodb.svc.cluster.local:27017/solar-system?authSource=solar-system"]) {
+                            sh 'npm test'
+
+                        }
+                    }
+                }
+            }
+            post {
+                always {
+                    // Archive test results regardless of success or failure
+                    archiveArtifacts allowEmptyArchive: true, artifacts: 'test-results.xml', followSymlinks: false
+                    junit 'test-results.xml' // Publish test results to Jenkins Test Results tab
                 }
             }
         }
