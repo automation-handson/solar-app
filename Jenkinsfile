@@ -52,13 +52,6 @@ pipeline {
                             sh 'npm test'
                 }
             }
-            post {
-                always {
-                    // Archive test results regardless of success or failure
-                    archiveArtifacts allowEmptyArchive: true, artifacts: 'test-results.xml', followSymlinks: false
-                    junit 'test-results.xml' // Publish test results to Jenkins Test Results tab
-                }
-            }
         }
         stage('NPM Run Coverage') {
             steps {
@@ -66,11 +59,6 @@ pipeline {
                     catchError(buildResult: 'SUCCESS', message: 'the code coverage has failed, we will modify the test cases in a future release;)', stageResult: 'UNSTABLE') {
                                 sh 'npm run coverage'
                     }
-                }
-            }
-            post {
-                always {
-                    publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: 'coverage/lcov-report', reportFiles: 'index.html', reportName: 'Code Coverage HTML Report', reportTitles: '', useWrapperFileDirectly: true])
                 }
             }
         }      
@@ -86,5 +74,15 @@ pipeline {
         //         }
         //     }
         // }
+    }
+    post {
+        always {
+            // Archive test results regardless of success or failure
+            archiveArtifacts allowEmptyArchive: true, artifacts: 'test-results.xml', followSymlinks: false
+            junit 'test-results.xml' // Publish test results to Jenkins Test Results tab
+
+            // Archive coverage results
+            publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: 'coverage/lcov-report', reportFiles: 'index.html', reportName: 'Code Coverage HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+        }
     }
 }
