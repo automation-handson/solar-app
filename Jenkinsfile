@@ -50,7 +50,6 @@ pipeline {
             steps {
                 container('nodejs') {
                     sh 'npm test'
-                    stash 'test-results'
                 }
             }
         }
@@ -59,7 +58,6 @@ pipeline {
                 container('nodejs') {
                     catchError(buildResult: 'SUCCESS', message: 'the code coverage has failed, we will modify the test cases in a future release;)', stageResult: 'UNSTABLE') {
                         sh 'npm run coverage'
-                        stash 'coverage/lcov-report/index.html'
                     }
                 }
             }
@@ -83,12 +81,10 @@ pipeline {
                 steps{
                     container('nodejs') {
                         // Archive test results regardless of success or failure
-                        unstash 'test-results'
                         archiveArtifacts allowEmptyArchive: true, artifacts: 'test-results.xml', followSymlinks: false
                         junit 'test-results.xml' // Publish test results to Jenkins Test Results tab
 
                         // Archive coverage results
-                        unstash 'coverage/lcov-report/index.html'
                         publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: 'coverage/lcov-report', reportFiles: 'index.html', reportName: 'Code Coverage HTML Report', reportTitles: '', useWrapperFileDirectly: true])
                     }
                 }
