@@ -7,6 +7,10 @@ pipeline {
             retries 2
         }
     }
+    environment {
+        // Set the environment variable for the MongoDB URI
+        MONGO_URI = credentials('mongo-cred')
+    }
     stages {
         stage('Install App Dependencies') {
             steps {
@@ -44,12 +48,7 @@ pipeline {
         stage('NPM Test') {
             steps {
                 container('nodejs') {
-                    withCredentials([usernamePassword(credentialsId: 'mongo-cred', passwordVariable: 'MONGO_PASSWORD', usernameVariable: 'MONGO_USERNAME')]) {
-                        withEnv(["MONGO_URI=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongodb.mongodb.svc.cluster.local:27017/solar-system?authSource=solar-system"]) {
                             sh 'npm test'
-
-                        }
-                    }
                 }
             }
             post {
@@ -63,12 +62,8 @@ pipeline {
         stage('NPM Run Coverage') {
             steps {
                 container('nodejs') {
-                    withCredentials([usernamePassword(credentialsId: 'mongo-cred', passwordVariable: 'MONGO_PASSWORD', usernameVariable: 'MONGO_USERNAME')]) {
-                        withEnv(["MONGO_URI=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongodb.mongodb.svc.cluster.local:27017/solar-system?authSource=solar-system"]) {
-                            catchError(buildResult: 'SUCCESS', message: 'the code coverage has failed, we will modify the test cases in a future release;)', stageResult: 'UNSTABLE') {
+                    catchError(buildResult: 'SUCCESS', message: 'the code coverage has failed, we will modify the test cases in a future release;)', stageResult: 'UNSTABLE') {
                                 sh 'npm run coverage'
-                            }   
-                        }
                     }
                 }
             }
@@ -77,7 +72,7 @@ pipeline {
                     publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: 'coverage/lcov-report', reportFiles: 'index.html', reportName: 'Code Coverage HTML Report', reportTitles: '', useWrapperFileDirectly: true])
                 }
             }
-        }        
+        }      
         // stage('test Kaniko') {
         //     steps {
         //         container('kaniko') {
