@@ -77,17 +77,13 @@ pipeline {
     }
     post {
         always {
-            stage('Archive Test, and Coverage Results') {
-                steps{
-                    container('nodejs') {
-                        // Archive test results regardless of success or failure
-                        archiveArtifacts allowEmptyArchive: true, artifacts: 'test-results.xml', followSymlinks: false
-                        junit 'test-results.xml' // Publish test results to Jenkins Test Results tab
+            container('nodejs') {
+                // Archive test results regardless of success or failure
+                archiveArtifacts allowEmptyArchive: true, artifacts: 'test-results.xml', followSymlinks: false
+                junit 'test-results.xml' // Publish test results to Jenkins Test Results tab
 
-                        // Archive coverage results
-                        publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: 'coverage/lcov-report', reportFiles: 'index.html', reportName: 'Code Coverage HTML Report', reportTitles: '', useWrapperFileDirectly: true])
-                    }
-                }
+                // Archive coverage results
+                publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: 'coverage/lcov-report', reportFiles: 'index.html', reportName: 'Code Coverage HTML Report', reportTitles: '', useWrapperFileDirectly: true])
             }
         }
     }
