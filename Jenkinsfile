@@ -55,7 +55,7 @@ pipeline {
             post {
                 always {
                     // Archive test results regardless of success or failure
-                    publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, icon: '', keepAll: true, reportDir: './', reportFiles: 'test-results.html', reportName: 'Unit Test HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+                    archiveArtifacts allowEmptyArchive: true, artifacts: 'test-results.xml', followSymlinks: false
                     junit 'test-results.xml' // Publish test results to Jenkins Test Results tab
                 }
             }
