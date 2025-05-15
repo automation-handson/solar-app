@@ -9,7 +9,8 @@ pipeline {
     }
     environment {
         // Set the environment variable for the MongoDB URI
-        MONGO_URI = credentials('mongo-cred')
+        MONGO_Cred = credentials('mongo-cred')
+        MONGO_URI = "mongodb://${MONGO_Cred}@mongodb.mongodb.svc.cluster.local:27017/solar-system?authSource=solar-system"
     }
     stages {
         stage('Install App Dependencies') {
