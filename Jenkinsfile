@@ -65,19 +65,16 @@ pipeline {
         stage('Run SAST Check - SonarQube') {
             steps {
                 //container('nodejs') {
-                    script {
-                        scannerHome = tool 'sonarqube-scanner'// must match the name of an actual scanner installation directory on your Jenkins build agent
-                    }
-                    withSonarQubeEnv('sonarqube-server') {// If you have configured more than one global server connection, you can specify its name as configured in Jenkins
-                        sh "${scannerHome}/bin/sonar-scanner"
-                    }
-                    script {
-                        // Wait for the quality gate result and fail the pipeline if it fails
-                        def qualityGate = waitForQualityGate()
-                        if (qualityGate.status != 'OK') {
-                            error "Pipeline failed due to SonarQube quality gate failure: ${qualityGate.status}"
-                        }
-                    }
+                script {
+                    scannerHome = tool 'sonarqube-scanner'// must match the name of an actual scanner installation directory on your Jenkins build agent
+                }
+                withSonarQubeEnv('sonarqube-server') {// If you have configured more than one global server connection, you can specify its name as configured in Jenkins
+                    sh "${scannerHome}/bin/sonar-scanner"
+                }
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+
                 //}
             }
         }
