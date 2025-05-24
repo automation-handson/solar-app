@@ -102,7 +102,6 @@ pipeline {
             steps {
                 container('trivy') {
                     sh """
-                    curl -o trivy-html.tpl https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl
                     trivy image \
                           --severity HIGH,CRITICAL \
                           --exit-code 1 \
