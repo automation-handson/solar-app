@@ -102,10 +102,12 @@ pipeline {
             steps {
                 container('trivy') {
                     sh """
+                    curl -o trivy-html.tpl https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl
                     trivy image \
                           --severity HIGH,CRITICAL \
                           --exit-code 1 \
-                          --format html \
+                          --format template \
+                          --template "@trivy-html.tpl" \
                           --output trivy-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html \
                           --ignore-unfixed \
                           docker.io/anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}
