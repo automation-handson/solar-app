@@ -79,6 +79,7 @@ pipeline {
             steps {
                 container('kaniko') {
                     sh """
+                    BRANCH_NAME=\$(echo \${GIT_BRANCH} | sed 's|/|-|g')
                     /kaniko/executor \
                     --dockerfile=Dockerfile \
                     --context=`pwd` \
