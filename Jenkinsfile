@@ -64,7 +64,6 @@ pipeline {
         }
         stage('Run SAST Check - SonarQube') {
             steps {
-                //container('nodejs') {
                 script {
                     scannerHome = tool 'sonarqube-scanner'// must match the name of an actual scanner installation directory on your Jenkins build agent
                 }
@@ -74,22 +73,46 @@ pipeline {
                 timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
-
-                //}
             }
         }
-        // stage('test Kaniko') {
-        //     steps {
-        //         container('kaniko') {
-        //             sh """
-        //             /kaniko/executor \
-        //             --dockerfile=Dockerfile \
-        //             --context=`pwd` \
-        //             --destination=docker.io/anas1243/solar-app:latest
-        //             """
-        //         }
-        //     }
-        // }
+        stage('Build and Push Docker Image') {
+            steps {
+                script {
+                    // Replace '/' with '-' in BRANCH_NAME and store it in a global environment variable
+                    env.SAFE_BRANCH_NAME = sh(
+                        script: "echo ${GIT_BRANCH} | sed 's|/|-|g'",
+                        returnStdout: true
+                    ).trim()
+                    // Extract the first 7 characters of GIT_COMMIT
+                    env.SHORT_COMMIT = GIT_COMMIT.substring(0, 7)
+                    echo "Safe Branch Name: ${env.SAFE_BRANCH_NAME}"
+                    echo "Short Commit: ${env.SHORT_COMMIT}"
+                }
+                container('kaniko') {
+                    sh """
+                    /kaniko/executor \
+                    --dockerfile=Dockerfile \
+                    --context=`pwd` \
+                    --destination=docker.io/anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}
+                    """
+                }
+            }
+        }
+        stage('Trivy Image scan'){
+            steps {
+                container('trivy') {
+                    sh """
+                    trivy image \
+                          --severity CRITICAL \
+                          --exit-code 1 \
+                          --format table \
+                          --output trivy-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html \
+                          --ignore-unfixed \
+                          docker.io/anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}
+                    """
+                }
+            }
+        }
     }
     post {
         always {
@@ -100,6 +123,9 @@ pipeline {
 
                 // Archive coverage results
                 publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: 'coverage/lcov-report', reportFiles: 'index.html', reportName: 'Code Coverage HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+            }
+            container('trivy') {
+                archiveArtifacts artifacts: "trivy-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html", followSymlinks: false
             }
         }
     }

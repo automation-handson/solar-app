@@ -54,10 +54,9 @@ function func() {
         .then(function(data) {
             document.getElementById('planetName').innerHTML = ` ${data.name} `
 
-            const element = document.getElementById("planetImage");
-            const image = ` ${data.image} `
-            element.style.backgroundImage  = "url("+image+")"
-
+            const element = document.getElementById("planetImage-2");
+            const image = data.image;
+            element.src  = encodeURI("images/"+image);
             const planet_description = ` ${data.description} `
             document.getElementById('planetDescription').innerHTML = planet_description.replace(/(.{80})/g, "$1<br>");
 
