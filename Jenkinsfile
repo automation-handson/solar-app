@@ -65,12 +65,16 @@ pipeline {
         stage('Run SAST Check - SonarQube') {
             steps {
                 //container('nodejs') {
-                    script {
-                        scannerHome = tool 'sonarqube-scanner'// must match the name of an actual scanner installation directory on your Jenkins build agent
-                    }
-                    withSonarQubeEnv('sonarqube-server') {// If you have configured more than one global server connection, you can specify its name as configured in Jenkins
-                        sh "${scannerHome}/bin/sonar-scanner"
-                    }
+                script {
+                    scannerHome = tool 'sonarqube-scanner'// must match the name of an actual scanner installation directory on your Jenkins build agent
+                }
+                withSonarQubeEnv('sonarqube-server') {// If you have configured more than one global server connection, you can specify its name as configured in Jenkins
+                    sh "${scannerHome}/bin/sonar-scanner"
+                }
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+
                 //}
             }
         }
