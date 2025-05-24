@@ -106,8 +106,7 @@ pipeline {
                     trivy image \
                           --severity HIGH,CRITICAL \
                           --exit-code 1 \
-                          --format template \
-                          --template "@trivy-html.tpl" \
+                          --format table \
                           --output trivy-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html \
                           --ignore-unfixed \
                           docker.io/anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}
@@ -127,7 +126,7 @@ pipeline {
                 publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: 'coverage/lcov-report', reportFiles: 'index.html', reportName: 'Code Coverage HTML Report', reportTitles: '', useWrapperFileDirectly: true])
             }
             container('trivy') {
-                publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: '.', reportFiles: "trivy-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html", reportName: 'Trivy Image Scan Report', reportTitles: '', useWrapperFileDirectly: true])
+                archiveArtifacts artifacts: "trivy-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html", followSymlinks: false
             }
         }
     }
