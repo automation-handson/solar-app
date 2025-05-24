@@ -7,6 +7,11 @@ pipeline {
             retries 2
         }
     }
+    environment {
+        // Set the environment variable for the MongoDB URI
+        MONGO_Cred = credentials('mongo-cred')
+        MONGO_URI = "mongodb://${MONGO_Cred}@mongodb.mongodb.svc.cluster.local:27017/solar-system?authSource=solar-system"
+    }
     stages {
         stage('Install App Dependencies') {
             steps {
@@ -44,40 +49,31 @@ pipeline {
         stage('NPM Test') {
             steps {
                 container('nodejs') {
-                    withCredentials([usernamePassword(credentialsId: 'mongo-cred', passwordVariable: 'MONGO_PASSWORD', usernameVariable: 'MONGO_USERNAME')]) {
-                        withEnv(["MONGO_URI=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongodb.mongodb.svc.cluster.local:27017/solar-system?authSource=solar-system"]) {
-                            sh 'npm test'
-
-                        }
-                    }
-                }
-            }
-            post {
-                always {
-                    // Archive test results regardless of success or failure
-                    archiveArtifacts allowEmptyArchive: true, artifacts: 'test-results.xml', followSymlinks: false
-                    junit 'test-results.xml' // Publish test results to Jenkins Test Results tab
+                    sh 'npm test'
                 }
             }
         }
         stage('NPM Run Coverage') {
             steps {
                 container('nodejs') {
-                    withCredentials([usernamePassword(credentialsId: 'mongo-cred', passwordVariable: 'MONGO_PASSWORD', usernameVariable: 'MONGO_USERNAME')]) {
-                        withEnv(["MONGO_URI=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongodb.mongodb.svc.cluster.local:27017/solar-system?authSource=solar-system"]) {
-                            catchError(buildResult: 'SUCCESS', message: 'the code coverage has failed, we will modify the test cases in a future release;)', stageResult: 'UNSTABLE') {
-                                sh 'npm run coverage'
-                            }   
-                        }
+                    catchError(buildResult: 'SUCCESS', message: 'the code coverage has failed, we will modify the test cases in a future release;)', stageResult: 'UNSTABLE') {
+                        sh 'npm run coverage'
                     }
                 }
             }
-            post {
-                always {
-                    publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: 'coverage/lcov-report', reportFiles: 'index.html', reportName: 'Code Coverage HTML Report', reportTitles: '', useWrapperFileDirectly: true])
-                }
+        }
+        stage('Run SAST Check - SonarQube') {
+            steps {
+                //container('nodejs') {
+                    script {
+                        scannerHome = tool 'sonarqube-scanner'// must match the name of an actual scanner installation directory on your Jenkins build agent
+                    }
+                    withSonarQubeEnv('sonarqube-server') {// If you have configured more than one global server connection, you can specify its name as configured in Jenkins
+                        sh "${scannerHome}/bin/sonar-scanner"
+                    }
+                //}
             }
-        }        
+        }
         // stage('test Kaniko') {
         //     steps {
         //         container('kaniko') {
@@ -90,5 +86,17 @@ pipeline {
         //         }
         //     }
         // }
+    }
+    post {
+        always {
+            container('nodejs') {
+                // Archive test results regardless of success or failure
+                archiveArtifacts allowEmptyArchive: true, artifacts: 'test-results.xml', followSymlinks: false
+                junit 'test-results.xml' // Publish test results to Jenkins Test Results tab
+
+                // Archive coverage results
+                publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: 'coverage/lcov-report', reportFiles: 'index.html', reportName: 'Code Coverage HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+            }
+        }
     }
 }
