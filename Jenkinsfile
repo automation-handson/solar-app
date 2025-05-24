@@ -64,7 +64,6 @@ pipeline {
         }
         stage('Run SAST Check - SonarQube') {
             steps {
-                //container('nodejs') {
                 script {
                     scannerHome = tool 'sonarqube-scanner'// must match the name of an actual scanner installation directory on your Jenkins build agent
                 }
@@ -74,22 +73,20 @@ pipeline {
                 timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
-
-                //}
             }
         }
-        // stage('test Kaniko') {
-        //     steps {
-        //         container('kaniko') {
-        //             sh """
-        //             /kaniko/executor \
-        //             --dockerfile=Dockerfile \
-        //             --context=`pwd` \
-        //             --destination=docker.io/anas1243/solar-app:latest
-        //             """
-        //         }
-        //     }
-        // }
+        stage('Build and Push Docker Image') {
+            steps {
+                container('kaniko') {
+                    sh """
+                    /kaniko/executor \
+                    --dockerfile=Dockerfile \
+                    --context=`pwd` \
+                    --destination=docker.io/anas1243/solar-app:${BRANCH_NAME}-${GIT_COMMIT} \
+                    """
+                }
+            }
+        }
     }
     post {
         always {
