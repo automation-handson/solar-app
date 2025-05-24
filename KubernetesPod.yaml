@@ -15,7 +15,16 @@ spec:
     - 99d
     volumeMounts:
     - name: kaniko-secret
-      mountPath: /kaniko/.docker 
+      mountPath: /kaniko/.docker
+  - name: trivy
+    image: aquasec/trivy:latest
+    command:
+      - sleep
+    args:
+    - 99d
+    volumeMounts:
+    - name: kaniko-secret
+      mountPath: /root/.docker    
   volumes:
   - name: kaniko-secret
     secret:

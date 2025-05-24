@@ -90,11 +90,25 @@ pipeline {
                 }
                 container('kaniko') {
                     sh """
-                    BRANCH_NAME=\$(echo \${GIT_BRANCH} | sed 's|/|-|g')
                     /kaniko/executor \
                     --dockerfile=Dockerfile \
                     --context=`pwd` \
                     --destination=docker.io/anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}
+                    """
+                }
+            }
+        }
+        stage('Trivy Image scan'){
+            steps {
+                container('trivy') {
+                    sh """
+                    trivy image \
+                          --severity HIGH,CRITICAL \
+                          --exit-code 1 \
+                          --format html \
+                          --output trivy-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html \
+                          --ignore-unfixed \
+                          docker.io/anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}
                     """
                 }
             }
@@ -109,6 +123,9 @@ pipeline {
 
                 // Archive coverage results
                 publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: 'coverage/lcov-report', reportFiles: 'index.html', reportName: 'Code Coverage HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+            }
+            container('trivy') {
+                publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: '.', reportFiles: "trivy-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html", reportName: 'Trivy Image Scan Report', reportTitles: '', useWrapperFileDirectly: true])
             }
         }
     }
