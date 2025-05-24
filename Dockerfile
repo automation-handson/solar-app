@@ -15,5 +15,5 @@ COPY --from=build /app .
 
 
 EXPOSE 3000
-
+USER node
 CMD ["npm", "start"]
