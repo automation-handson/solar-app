@@ -71,6 +71,13 @@ pipeline {
                     withSonarQubeEnv('sonarqube-server') {// If you have configured more than one global server connection, you can specify its name as configured in Jenkins
                         sh "${scannerHome}/bin/sonar-scanner"
                     }
+                    script {
+                        // Wait for the quality gate result and fail the pipeline if it fails
+                        def qualityGate = waitForQualityGate()
+                        if (qualityGate.status != 'OK') {
+                            error "Pipeline failed due to SonarQube quality gate failure: ${qualityGate.status}"
+                        }
+                    }
                 //}
             }
         }
