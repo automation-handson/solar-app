@@ -83,7 +83,10 @@ pipeline {
                         script: "echo ${GIT_BRANCH} | sed 's|/|-|g'",
                         returnStdout: true
                     ).trim()
+                    // Extract the first 7 characters of GIT_COMMIT
+                    env.SHORT_COMMIT = GIT_COMMIT.substring(0, 7)
                     echo "Safe Branch Name: ${env.SAFE_BRANCH_NAME}"
+                    echo "Short Commit: ${env.SHORT_COMMIT}"
                 }
                 container('kaniko') {
                     sh """
@@ -91,7 +94,7 @@ pipeline {
                     /kaniko/executor \
                     --dockerfile=Dockerfile \
                     --context=`pwd` \
-                    --destination=docker.io/anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${GIT_COMMIT:0:7}
+                    --destination=docker.io/anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}
                     """
                 }
             }
