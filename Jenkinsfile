@@ -77,13 +77,21 @@ pipeline {
         }
         stage('Build and Push Docker Image') {
             steps {
+                script {
+                    // Replace '/' with '-' in BRANCH_NAME and store it in a global environment variable
+                    env.SAFE_BRANCH_NAME = sh(
+                        script: "echo ${GIT_BRANCH} | sed 's|/|-|g'",
+                        returnStdout: true
+                    ).trim()
+                    echo "Safe Branch Name: ${env.SAFE_BRANCH_NAME}"
+                }
                 container('kaniko') {
                     sh """
                     BRANCH_NAME=\$(echo \${GIT_BRANCH} | sed 's|/|-|g')
                     /kaniko/executor \
                     --dockerfile=Dockerfile \
                     --context=`pwd` \
-                    --destination=docker.io/anas1243/solar-app:${BRANCH_NAME}-${GIT_COMMIT} \
+                    --destination=docker.io/anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${GIT_COMMIT:0:7}
                     """
                 }
             }
