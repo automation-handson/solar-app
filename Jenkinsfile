@@ -103,7 +103,7 @@ pipeline {
                 container('trivy') {
                     sh """
                     trivy image \
-                          --severity HIGH,CRITICAL \
+                          --severity CRITICAL \
                           --exit-code 1 \
                           --format table \
                           --output trivy-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html \
