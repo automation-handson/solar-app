@@ -103,12 +103,22 @@ pipeline {
                 container('trivy') {
                     sh """
                     trivy image \
-                          --severity CRITICAL \
-                          --exit-code 1 \
-                          --format table \
-                          --output trivy-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html \
+                          --severity LOW,MEDIUM,HIGH \
+                          --exit-code 0 \
+                          --format template \
+                          --template '@/contrib/html.tpl' \
+                          --output trivy-MEDIUM-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html \
                           --ignore-unfixed \
                           docker.io/anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}
+
+                    trivy image \
+                          --severity CRITICAL \
+                          --exit-code 1 \
+                          --format template \
+                          --template '@/contrib/html.tpl' \
+                          --output trivy-CRITICAL-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html \
+                          --ignore-unfixed \
+                          docker.io/anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}      
                     """
                 }
             }
@@ -125,7 +135,9 @@ pipeline {
                 publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: 'coverage/lcov-report', reportFiles: 'index.html', reportName: 'Code Coverage HTML Report', reportTitles: '', useWrapperFileDirectly: true])
             }
             container('trivy') {
-                archiveArtifacts artifacts: "trivy-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html", followSymlinks: false
+                publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: '', reportFiles: "trivy-MEDIUM-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html", reportName: 'Medium  Trivy Vulnerability Report', reportTitles: '', useWrapperFileDirectly: true])
+
+                publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: '', reportFiles: "trivy-CRITICAL-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html", reportName: 'Critical Trivy Vulnerability Report', reportTitles: '', useWrapperFileDirectly: true])
             }
         }
     }
