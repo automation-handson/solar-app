@@ -136,9 +136,9 @@ pipeline {
             steps {
                 container('git') {
                     git branch: 'main', credentialsId: 'github-app', url: 'https://github.com/automation-handson/solar-infra'
-                    ls -l
                     // Update the image tag in the solar-infra repo
                     sh """
+                    ls -l
                     sed -i 's|image: anas1243/solar-app:.*|image: anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}|' solar-deployment.yaml
                     
                     git add solar-app-deployment.yaml
