@@ -16,6 +16,12 @@ spec:
     volumeMounts:
     - name: kaniko-secret
       mountPath: /kaniko/.docker
+  - name: git
+    image: alpine/git:latest
+    command:
+      - sleep
+    args:
+    - 99d    
   - name: trivy
     image: aquasec/trivy:latest
     command:
