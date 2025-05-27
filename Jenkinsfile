@@ -145,6 +145,7 @@ pipeline {
                     git commit -m "Update solar-app image tag to ${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}"
                     git push origin main
                     """
+                }    
             }
         }
     }
