@@ -3,7 +3,6 @@ pipeline {
     agent {
         kubernetes {
             yamlFile 'KubernetesPod.yaml'
-            // defaultContainer 'nodejs'
             retries 2
         }
     }
@@ -17,7 +16,6 @@ pipeline {
             steps {
                 container('nodejs'){
                     sh 'npm install --no-audit'
-                    sh 'ls -la'
                 }
             }
         }
@@ -70,6 +68,8 @@ pipeline {
                 withSonarQubeEnv('sonarqube-server') {// If you have configured more than one global server connection, you can specify its name as configured in Jenkins
                     sh "${scannerHome}/bin/sonar-scanner"
                 }
+                // Wait for SonarQube analysis to complete. Fail the build if the quality gate is not met.
+                // This will block the pipeline until the quality gate is checked
                 timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
@@ -101,6 +101,9 @@ pipeline {
         stage('Trivy Image scan'){
             steps {
                 container('trivy') {
+                    // Run Trivy scan for Medium and Critical vulnerabilities
+                    // Medium vulnerabilities will not fail the build, but Critical will
+                    // Run Trivy scan for Critical vulnerabilities
                     sh """
                     trivy image \
                           --severity LOW,MEDIUM,HIGH \
@@ -127,6 +130,7 @@ pipeline {
     post {
         always {
             container('nodejs') {
+                // using the nodejs container to archive test results and coverage reports
                 // Archive test results regardless of success or failure
                 archiveArtifacts allowEmptyArchive: true, artifacts: 'test-results.xml', followSymlinks: false
                 junit 'test-results.xml' // Publish test results to Jenkins Test Results tab
@@ -135,8 +139,10 @@ pipeline {
                 publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: 'coverage/lcov-report', reportFiles: 'index.html', reportName: 'Code Coverage HTML Report', reportTitles: '', useWrapperFileDirectly: true])
             }
             container('trivy') {
+                // using the trivy container to publish the Trivy Low, Medium, High
                 publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: '', reportFiles: "trivy-MEDIUM-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html", reportName: 'Medium  Trivy Vulnerability Report', reportTitles: '', useWrapperFileDirectly: true])
-
+                
+                // publish the Trivy Critical report
                 publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: '', reportFiles: "trivy-CRITICAL-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html", reportName: 'Critical Trivy Vulnerability Report', reportTitles: '', useWrapperFileDirectly: true])
             }
         }
