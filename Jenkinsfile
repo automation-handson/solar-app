@@ -130,7 +130,7 @@ pipeline {
             when {
                 expression {
                     // Only run this stage if the branch is main
-                    TARGET_BRANCH == 'main'
+                    ${TARGET_BRANCH} == 'main'
                 }
             }
             steps {
