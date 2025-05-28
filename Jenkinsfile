@@ -137,7 +137,7 @@ pipeline {
                         sh """
                             git config --global user.email "github-app@automation-handson.com"
                             git config --global user.name "GitHub App Automation"
-                            git config --global --add safe.directory $(pwd)
+                            git config --global --add safe.directory `pwd`
                         """
 
                         echo "Using GitHub App credentials to pull and push changes..."
