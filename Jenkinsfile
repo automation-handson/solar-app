@@ -140,7 +140,7 @@ pipeline {
                         git config --global user.email "Jenkins@devvf.com"
                         git config --global user.name "Jenkins CI"
                         """
-                        git branch: 'main', credentialsId: 'github-app', url: 'https://github.com/automation-handson/solar-infra.git'
+                        git branch: 'main', credentialsId: 'github-app', url: 'https://api.github.com/automation-handson/solar-infra.git'
                         // Update the image tag in the solar-infra repo
                         sh """
                         ls -l
