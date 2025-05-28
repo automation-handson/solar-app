@@ -137,8 +137,8 @@ pipeline {
                         echo 'Configuring Git safe directory...'
                         git config --global --add safe.directory `pwd`
 
-                        # git config --global user.email "Jenkins@devvf.com"
-                        # git config --global user.name "Jenkins CI"
+                        git config --global user.email "github-app@automation-handson.com"
+                        git config --global user.name "GitHub App Automation"
                         """
                         git branch: 'main', credentialsId: 'github-app', url: 'https://github.com/automation-handson/solar-infra.git'
                         // Update the image tag in the solar-infra repo
