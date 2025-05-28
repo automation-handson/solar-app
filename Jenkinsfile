@@ -149,9 +149,6 @@ pipeline {
                         git add solar-deployment.yaml
                         git commit -m "Update solar-app image tag to ${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}"
                         git push origin main
-
-                        git push https://x-access-token:${GITHUB_TOKEN}@github.com/automation-handson/solar-infra.git main
-
                         """
                     }    
                 }    
