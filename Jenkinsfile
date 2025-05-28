@@ -127,9 +127,9 @@ pipeline {
             }
         }
         stage('update image tag in solar-infra repo') {
-            when {
-                expression { env.BRANCH_NAME == 'main' }
-            }
+            // when {
+            //     expression { env.BRANCH_NAME == 'main' }
+            // }
             steps {
                 container('git') {
                     git branch: 'main', credentialsId: 'github-app', url: 'https://github.com/automation-handson/solar-infra'
@@ -137,8 +137,8 @@ pipeline {
                     sh """
                     ls -l
                     sed -i 's|image: anas1243/solar-app:.*|image: anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}|' solar-deployment.yaml
-                    
-                    git add solar-app-deployment.yaml
+                    cat solar-deployment.yaml
+                    git add solar-deployment.yaml
                     git commit -m "Update solar-app image tag to ${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}"
                     git push origin main
                     """
