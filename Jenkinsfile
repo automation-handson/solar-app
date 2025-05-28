@@ -135,30 +135,30 @@ pipeline {
                     script {
                         echo "Configuring Git user identity..."
                         sh """
-                            git config --global user.email "github-app@automation-handson.com"
-                            git config --global user.name "GitHub App Automation"
-                            git config --global --add safe.directory `pwd`
+                        git config --global user.email "github-app@automation-handson.com"
+                        git config --global user.name "GitHub App Automation"
+                        git config --global --add safe.directory `pwd`
                         """
 
                         echo "Using GitHub App credentials to pull and push changes..."
-                        withCredentials([sshUserPrivateKey(credentialsId: 'github-app', keyFileVariable: 'SSH_KEY')]) {
+                        withCredentials([usernamePassword(credentialsId: 'githubapp-jenkins', usernameVariable: 'GITHUB_APP',
+                        passwordVariable: 'GITHUB_ACCESS_TOKEN')]) {
                             sh """
-                            eval \$(ssh-agent)
-                            ssh-add ${SSH_KEY}
-
                             echo "Cloning the solar-infra repository..."
-                            git clone git@github.com:automation-handson/solar-infra.git
+                            git clone https://${GITHUB_APP}:${GITHUB_ACCESS_TOKEN}@github.com/automation-handson/solar-infra.git
                             cd solar-infra
 
                             echo "Updating the image tag in solar-deployment.yaml..."
                             sed -i 's|image: anas1243/solar-app:.*|image: anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}|' solar-deployment.yaml
                             git add solar-deployment.yaml
                             git commit -m "Update solar-app image tag to ${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}"
-                            git push origin main
+                            git push https://${GITHUB_APP}:${GITHUB_ACCESS_TOKEN}@github.com/automation-handson/solar-infra.git main
                             """
                         }
                     }
-                }    
+                    // Print a success message
+                    echo "Image tag updated and changes pushed successfully."
+                }
             }
         }
     }
