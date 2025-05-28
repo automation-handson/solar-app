@@ -141,7 +141,7 @@ pipeline {
                         """
 
                         echo "Using GitHub App credentials to pull and push changes..."
-                        withCredentials([usernamePassword(credentialsId: 'githubapp-jenkins', usernameVariable: 'GITHUB_APP',
+                        withCredentials([usernamePassword(credentialsId: 'github-app', usernameVariable: 'GITHUB_APP',
                         passwordVariable: 'GITHUB_ACCESS_TOKEN')]) {
                             sh """
                             echo "Cloning the solar-infra repository..."
