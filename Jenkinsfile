@@ -133,14 +133,14 @@ pipeline {
             steps {
                 container('git') {
                     script {
-                        // sh """
-                        // echo 'Configuring Git safe directory...'
-                        // git config --global --add safe.directory `pwd`
+                        sh """
+                        echo 'Configuring Git safe directory...'
+                        git config --global --add safe.directory `pwd`
 
-                        // git config --global user.email "Jenkins@devvf.com"
-                        // git config --global user.name "Jenkins CI"
-                        // """
-                        git branch: 'main', credentialsId: 'github-app', url: 'git@github.com:automation-handson/solar-infra.git'
+                        git config --global user.email "Jenkins@devvf.com"
+                        git config --global user.name "Jenkins CI"
+                        """
+                        git branch: 'main', credentialsId: 'github-app', url: 'https://github.com/automation-handson/solar-infra.git'
                         // Update the image tag in the solar-infra repo
                         sh """
                         ls -l
