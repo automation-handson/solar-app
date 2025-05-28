@@ -128,10 +128,7 @@ pipeline {
         }
         stage('update image tag in solar-infra repo') {
             when {
-                expression {
-                    // Only run this stage if the branch is main
-                    env.TARGET_BRANCH == 'main'
-                }
+                expression { env.BRANCH_NAME == 'main' }
             }
             steps {
                 container('git') {
