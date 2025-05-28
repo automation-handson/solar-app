@@ -140,7 +140,7 @@ pipeline {
                         git config --global user.email "github-app@automation-handson.com"
                         git config --global user.name "GitHub App Automation"
                         """
-                        git branch: 'main', credentialsId: 'github-app', url: 'https://github.com/automation-handson/solar-infra.git'
+                        git branch: 'main', credentialsId: 'github-app', url: 'ssh://github.com/automation-handson/solar-infra.git'
                         // Update the image tag in the solar-infra repo
                         sh """
                         ls -l
@@ -148,7 +148,7 @@ pipeline {
                         cat solar-deployment.yaml
                         git add solar-deployment.yaml
                         git commit -m "Update solar-app image tag to ${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}"
-                        git push https://x-access-token:${GITHUB_TOKEN}@github.com/automation-handson/solar-infra.git main
+                        git push origin main
                         """
                     }    
                 }    
