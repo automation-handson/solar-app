@@ -132,8 +132,8 @@ pipeline {
             // }
             steps {
                 container('git') {
-                    echo "Configuring Git safe directory..."
                     sh """
+                    echo "Configuring Git safe directory..."
                     git config --global --add safe.directory $(pwd)
                     """
                     git branch: 'main', credentialsId: 'github-app', url: 'https://github.com/automation-handson/solar-infra'
