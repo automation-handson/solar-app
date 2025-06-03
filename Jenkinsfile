@@ -135,8 +135,8 @@ pipeline {
                     script {
                         echo "Configuring Git user identity..."
                         sh """
-                        git config --global user.email "github-app@automation-handson.com"
-                        git config --global user.name "GitHub App Automation"
+                        git config --global user.email "jenkins@automation-handson.com"
+                        git config --global user.name "Jenkins CI"
                         git config --global --add safe.directory `pwd`
                         """
 
