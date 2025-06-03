@@ -127,22 +127,38 @@ pipeline {
             }
         }
         stage('update image tag in solar-infra repo') {
-            when {
-                expression { env.BRANCH_NAME == 'main' }
-            }
+            // when {
+            //     expression { env.BRANCH_NAME == 'main' }
+            // }
             steps {
                 container('git') {
-                    git branch: 'main', credentialsId: 'github-app', url: 'https://github.com/automation-handson/solar-infra'
-                    // Update the image tag in the solar-infra repo
-                    sh """
-                    ls -l
-                    sed -i 's|image: anas1243/solar-app:.*|image: anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}|' solar-deployment.yaml
-                    
-                    git add solar-app-deployment.yaml
-                    git commit -m "Update solar-app image tag to ${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}"
-                    git push origin main
-                    """
-                }    
+                    script {
+                        echo "Configuring Git user identity..."
+                        sh """
+                        git config --global user.email "jenkins@automation-handson.com"
+                        git config --global user.name "Jenkins CI"
+                        git config --global --add safe.directory `pwd`
+                        """
+
+                        echo "Using GitHub App credentials to pull and push changes..."
+                        withCredentials([usernamePassword(credentialsId: 'github-app', usernameVariable: 'GITHUB_APP',
+                        passwordVariable: 'GITHUB_ACCESS_TOKEN')]) {
+                            sh """
+                            echo "Cloning the solar-infra repository..."
+                            git clone https://${GITHUB_APP}:${GITHUB_ACCESS_TOKEN}@github.com/automation-handson/solar-infra.git
+                            cd solar-infra
+
+                            echo "Updating the image tag in solar-deployment.yaml..."
+                            sed -i 's|image: anas1243/solar-app:.*|image: anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}|' solar-deployment.yaml
+                            git add solar-deployment.yaml
+                            git commit -m "Update solar-app image tag to ${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}"
+                            git push https://${GITHUB_APP}:${GITHUB_ACCESS_TOKEN}@github.com/automation-handson/solar-infra.git main
+                            """
+                        }
+                    }
+                    // Print a success message
+                    echo "Image tag updated and changes pushed successfully."
+                }
             }
         }
     }
