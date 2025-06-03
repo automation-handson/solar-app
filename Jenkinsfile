@@ -76,6 +76,9 @@ pipeline {
             }
         }
         stage('Build and Push Docker Image') {
+            when {
+                expression { env.BRANCH_NAME == 'main' }
+            }
             steps {
                 script {
                     // Replace '/' with '-' in BRANCH_NAME and store it in a global environment variable
@@ -99,6 +102,9 @@ pipeline {
             }
         }
         stage('Trivy Image scan'){
+            when {
+                expression { env.BRANCH_NAME == 'main' }
+            }
             steps {
                 container('trivy') {
                     // Run Trivy scan for Medium and Critical vulnerabilities
@@ -127,9 +133,9 @@ pipeline {
             }
         }
         stage('update image tag in solar-infra repo') {
-            // when {
-            //     expression { env.BRANCH_NAME == 'main' }
-            // }
+            when {
+                expression { env.BRANCH_NAME == 'main' }
+            }
             steps {
                 container('git') {
                     script {
@@ -174,11 +180,15 @@ pipeline {
                 publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: 'coverage/lcov-report', reportFiles: 'index.html', reportName: 'Code Coverage HTML Report', reportTitles: '', useWrapperFileDirectly: true])
             }
             container('trivy') {
-                // using the trivy container to publish the Trivy Low, Medium, High
-                publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: '', reportFiles: "trivy-MEDIUM-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html", reportName: 'Medium  Trivy Vulnerability Report', reportTitles: '', useWrapperFileDirectly: true])
+                script {
+                    if (env.BRANCH_NAME == 'main') {
+                        // using the trivy container to publish the Trivy Low, Medium, High
+                        publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: '', reportFiles: "trivy-MEDIUM-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html", reportName: 'Medium  Trivy Vulnerability Report', reportTitles: '', useWrapperFileDirectly: true])
                 
-                // publish the Trivy Critical report
-                publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: '', reportFiles: "trivy-CRITICAL-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html", reportName: 'Critical Trivy Vulnerability Report', reportTitles: '', useWrapperFileDirectly: true])
+                        // publish the Trivy Critical report
+                        publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: '', reportFiles: "trivy-CRITICAL-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html", reportName: 'Critical Trivy Vulnerability Report', reportTitles: '', useWrapperFileDirectly: true])
+                    }
+                }
             }
         }
     }
