@@ -77,7 +77,7 @@ pipeline {
         }
         stage('Build and Push Docker Image') {
             when {
-                expression { env.BRANCH_NAME == 'main' }
+                expression { env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'dev' }
             }
             steps {
                 script {
@@ -103,7 +103,7 @@ pipeline {
         }
         stage('Trivy Image scan'){
             when {
-                expression { env.BRANCH_NAME == 'main' }
+                expression { env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'dev' }
             }
             steps {
                 container('trivy') {
@@ -181,7 +181,7 @@ pipeline {
             }
             container('trivy') {
                 script {
-                    if (env.BRANCH_NAME == 'main') {
+                    if (env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'dev') {
                         // using the trivy container to publish the Trivy Low, Medium, High
                         publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, icon: '', keepAll: true, reportDir: '', reportFiles: "trivy-MEDIUM-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html", reportName: 'Medium  Trivy Vulnerability Report', reportTitles: '', useWrapperFileDirectly: true])
                 
