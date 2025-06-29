@@ -134,7 +134,7 @@ pipeline {
         }
         stage('update image tag in solar-infra repo') {
             when {
-                expression { env.BRANCH_NAME == 'main' }
+                expression { env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'dev' }
             }
             steps {
                 container('git') {
@@ -153,12 +153,15 @@ pipeline {
                             echo "Cloning the solar-infra repository..."
                             git clone https://${GITHUB_APP}:${GITHUB_ACCESS_TOKEN}@github.com/automation-handson/solar-infra.git
                             cd solar-infra
+                            
+                            echo "Checking out or creating branch ${env.BRANCH_NAME}..."
+                            git checkout -B ${env.BRANCH_NAME}
 
-                            echo "Updating the image tag in solar-deployment.yaml..."
+                            echo "Updating the image tag in solar-deployment.yaml... on the ${env.BRANCH_NAME} branch"
                             sed -i 's|image: anas1243/solar-app:.*|image: anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}|' solar-deployment.yaml
                             git add solar-deployment.yaml
                             git commit -m "Update solar-app image tag to ${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}"
-                            git push https://${GITHUB_APP}:${GITHUB_ACCESS_TOKEN}@github.com/automation-handson/solar-infra.git main
+                            git push https://${GITHUB_APP}:${GITHUB_ACCESS_TOKEN}@github.com/automation-handson/solar-infra.git ${env.BRANCH_NAME}
                             """
                         }
                     }
