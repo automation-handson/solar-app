@@ -65,7 +65,7 @@ pipeline {
         stage('Run SAST Check - SonarQube') {
             steps {
                 withSonarQubeEnv('sonarqube-server') {// If you have configured more than one global server connection, you can specify its name as configured in Jenkins
-                    sh "${env.SCANNER_HOME}/bin/sonar-scanner"
+                    sh "$SCANNER_HOME/bin/sonar-scanner"
                 }
                 // Wait for SonarQube analysis to complete. Fail the build if the quality gate is not met.
                 // This will block the pipeline until the quality gate is checked
