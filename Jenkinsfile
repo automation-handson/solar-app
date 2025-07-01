@@ -150,11 +150,8 @@ pipeline {
                         passwordVariable: 'GITHUB_ACCESS_TOKEN')]) {
                             sh """
                             echo "Cloning the solar-infra repository..."
-                            git clone https://${GITHUB_APP}:${GITHUB_ACCESS_TOKEN}@github.com/automation-handson/solar-infra.git
+                            git clone -b $BRANCH_NAME https://${GITHUB_APP}:${GITHUB_ACCESS_TOKEN}@github.com/automation-handson/solar-infra.git
                             cd solar-infra
-                            
-                            echo "Checking out or creating branch $BRANCH_NAME"
-                            git checkout -B $BRANCH_NAME
 
                             echo "Updating the image tag in solar-deployment.yaml... on the $BRANCH_NAME branch"
                             sed -i "s|image: anas1243/solar-app:.*|image: anas1243/solar-app:$SAFE_BRANCH_NAME-$SHORT_COMMIT|" solar-deployment.yaml
