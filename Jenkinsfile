@@ -10,6 +10,8 @@ pipeline {
         // Set the environment variable for the MongoDB URI
         MONGO_Cred = credentials('mongo-cred')
         MONGO_URI = "mongodb://${MONGO_Cred}@mongodb.mongodb.svc.cluster.local:27017/solar-system?authSource=solar-system"
+        SCANNER_HOME = tool 'sonarqube-scanner'// must match the name of an actual scanner installation directory on your Jenkins build agent
+
     }
     stages {
         stage('Install App Dependencies') {
@@ -62,11 +64,8 @@ pipeline {
         }
         stage('Run SAST Check - SonarQube') {
             steps {
-                script {
-                    scannerHome = tool 'sonarqube-scanner'// must match the name of an actual scanner installation directory on your Jenkins build agent
-                }
                 withSonarQubeEnv('sonarqube-server') {// If you have configured more than one global server connection, you can specify its name as configured in Jenkins
-                    sh "${scannerHome}/bin/sonar-scanner"
+                    sh "${env.SCANNER_HOME}/bin/sonar-scanner"
                 }
                 // Wait for SonarQube analysis to complete. Fail the build if the quality gate is not met.
                 // This will block the pipeline until the quality gate is checked
