@@ -10,6 +10,8 @@ pipeline {
         // Set the environment variable for the MongoDB URI
         MONGO_Cred = credentials('mongo-cred')
         MONGO_URI = "mongodb://${MONGO_Cred}@mongodb.mongodb.svc.cluster.local:27017/solar-system?authSource=solar-system"
+        SCANNER_HOME = tool 'sonarqube-scanner'// must match the name of an actual scanner installation directory on your Jenkins build agent
+
     }
     stages {
         stage('Install App Dependencies') {
@@ -62,11 +64,8 @@ pipeline {
         }
         stage('Run SAST Check - SonarQube') {
             steps {
-                script {
-                    scannerHome = tool 'sonarqube-scanner'// must match the name of an actual scanner installation directory on your Jenkins build agent
-                }
                 withSonarQubeEnv('sonarqube-server') {// If you have configured more than one global server connection, you can specify its name as configured in Jenkins
-                    sh "${scannerHome}/bin/sonar-scanner"
+                    sh "$SCANNER_HOME/bin/sonar-scanner"
                 }
                 // Wait for SonarQube analysis to complete. Fail the build if the quality gate is not met.
                 // This will block the pipeline until the quality gate is checked
@@ -96,7 +95,7 @@ pipeline {
                     /kaniko/executor \
                     --dockerfile=Dockerfile \
                     --context=`pwd` \
-                    --destination=docker.io/anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}
+                    --destination=docker.io/anas1243/solar-app:$SAFE_BRANCH_NAME-$SHORT_COMMIT
                     """
                 }
             }
@@ -116,18 +115,18 @@ pipeline {
                           --exit-code 0 \
                           --format template \
                           --template '@/contrib/html.tpl' \
-                          --output trivy-MEDIUM-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html \
+                          --output trivy-MEDIUM-report-$SAFE_BRANCH_NAME-$SHORT_COMMIT.html \
                           --ignore-unfixed \
-                          docker.io/anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}
+                          docker.io/anas1243/solar-app:$SAFE_BRANCH_NAME-$SHORT_COMMIT
 
                     trivy image \
                           --severity CRITICAL \
                           --exit-code 1 \
                           --format template \
                           --template '@/contrib/html.tpl' \
-                          --output trivy-CRITICAL-report-${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}.html \
+                          --output trivy-CRITICAL-report-$SAFE_BRANCH_NAME-$SHORT_COMMIT.html \
                           --ignore-unfixed \
-                          docker.io/anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}      
+                          docker.io/anas1243/solar-app:$SAFE_BRANCH_NAME-$SHORT_COMMIT     
                     """
                 }
             }
@@ -154,14 +153,14 @@ pipeline {
                             git clone https://${GITHUB_APP}:${GITHUB_ACCESS_TOKEN}@github.com/automation-handson/solar-infra.git
                             cd solar-infra
                             
-                            echo "Checking out or creating branch ${env.BRANCH_NAME}..."
-                            git checkout -B ${env.BRANCH_NAME}
+                            echo "Checking out or creating branch $BRANCH_NAME"
+                            git checkout -B $BRANCH_NAME
 
-                            echo "Updating the image tag in solar-deployment.yaml... on the ${env.BRANCH_NAME} branch"
-                            sed -i 's|image: anas1243/solar-app:.*|image: anas1243/solar-app:${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}|' solar-deployment.yaml
+                            echo "Updating the image tag in solar-deployment.yaml... on the $BRANCH_NAME branch"
+                            sed -i "s|image: anas1243/solar-app:.*|image: anas1243/solar-app:$SAFE_BRANCH_NAME-$SHORT_COMMIT|" solar-deployment.yaml
                             git add solar-deployment.yaml
-                            git commit -m "Update solar-app image tag to ${env.SAFE_BRANCH_NAME}-${env.SHORT_COMMIT}"
-                            git push https://${GITHUB_APP}:${GITHUB_ACCESS_TOKEN}@github.com/automation-handson/solar-infra.git ${env.BRANCH_NAME}
+                            git commit -m "Update solar-app image tag to $SAFE_BRANCH_NAME-$SHORT_COMMIT"
+                            git push https://${GITHUB_APP}:${GITHUB_ACCESS_TOKEN}@github.com/automation-handson/solar-infra.git $BRANCH_NAME
                             """
                         }
                     }
