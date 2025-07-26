@@ -23,6 +23,7 @@
   "devDependencies": {
     "chai": "*",
     "chai-http": "*",
-    "mocha": "*"
+    "mocha": "*",
+    "form-data": "^4.0.4"
   }
 }
