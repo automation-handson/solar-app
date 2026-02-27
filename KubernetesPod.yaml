@@ -29,9 +29,9 @@ spec:
       - sleep
     args:
     - 99d
-    volumeMounts:
-    - name: kaniko-secret
-      mountPath: /root/.docker
+    # volumeMounts:
+    # - name: kaniko-secret
+    #   mountPath: /root/.docker
   volumes:
   - name: kaniko-secret
     secret:

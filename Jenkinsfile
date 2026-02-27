@@ -101,7 +101,7 @@ pipeline {
 
                             echo "{\\"auths\\":{\\"https://index.docker.io/v1/\\":{\\"auth\\":\\"\${AUTH}\\"}}}" > /kaniko/.docker/config.json
 
-                            
+
                             /kaniko/executor \
                             --dockerfile=Dockerfile \
                             --context=`pwd` \
@@ -117,28 +117,39 @@ pipeline {
             }
             steps {
                 container('trivy') {
-                    // Run Trivy scan for Medium and Critical vulnerabilities
-                    // Medium vulnerabilities will not fail the build, but Critical will
-                    // Run Trivy scan for Critical vulnerabilities
-                    sh """
-                    trivy image \
-                          --severity LOW,MEDIUM,HIGH \
-                          --exit-code 0 \
-                          --format template \
-                          --template '@/contrib/html.tpl' \
-                          --output trivy-MEDIUM-report-$SAFE_BRANCH_NAME-${SHORT_COMMIT}.html \
-                          --ignore-unfixed \
-                          docker.io/anas1243/solar-app:$SAFE_BRANCH_NAME-$SHORT_COMMIT
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', 
+                             usernameVariable: 'DOCKER_USER', 
+                             passwordVariable: 'DOCKER_PASSWORD')]) {
+                            // Run Trivy scan for Medium and Critical vulnerabilities
+                            // Medium vulnerabilities will not fail the build, but Critical will
+                            // Run Trivy scan for Critical vulnerabilities
+                            sh """
 
-                    trivy image \
-                          --severity CRITICAL \
-                          --exit-code 1 \
-                          --format template \
-                          --template '@/contrib/html.tpl' \
-                          --output trivy-CRITICAL-report-$SAFE_BRANCH_NAME-${SHORT_COMMIT}.html \
-                          --ignore-unfixed \
-                          docker.io/anas1243/solar-app:$SAFE_BRANCH_NAME-$SHORT_COMMIT     
-                    """
+                            mkdir -p /root/.docker
+
+                            AUTH=\$(echo -n "\${DOCKER_USER}:\${DOCKER_PASSWORD}" | base64 | tr -d '\\n')
+
+                            echo "{\\"auths\\":{\\"https://index.docker.io/v1/\\":{\\"auth\\":\\"\${AUTH}\\"}}}" > /root/.docker/config.json
+
+                            trivy image \
+                                --severity LOW,MEDIUM,HIGH \
+                                --exit-code 0 \
+                                --format template \
+                                --template '@/contrib/html.tpl' \
+                                --output trivy-MEDIUM-report-$SAFE_BRANCH_NAME-${SHORT_COMMIT}.html \
+                                --ignore-unfixed \
+                                docker.io/anas1243/solar-app:$SAFE_BRANCH_NAME-$SHORT_COMMIT
+
+                            trivy image \
+                                --severity CRITICAL \
+                                --exit-code 1 \
+                                --format template \
+                                --template '@/contrib/html.tpl' \
+                                --output trivy-CRITICAL-report-$SAFE_BRANCH_NAME-${SHORT_COMMIT}.html \
+                                --ignore-unfixed \
+                                docker.io/anas1243/solar-app:$SAFE_BRANCH_NAME-$SHORT_COMMIT     
+                            """
+                            }  
                 }
             }
         }
