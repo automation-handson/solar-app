@@ -101,7 +101,6 @@ pipeline {
 
                             echo "{\\"auths\\":{\\"https://index.docker.io/v1/\\":{\\"auth\\":\\"\${AUTH}\\"}}}" > /kaniko/.docker/config.json
 
-
                             /kaniko/executor \
                             --dockerfile=Dockerfile \
                             --context=`pwd` \
