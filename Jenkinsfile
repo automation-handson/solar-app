@@ -91,17 +91,13 @@ pipeline {
                     echo "Short Commit: ${env.SHORT_COMMIT}"
                 }
                 container('kaniko') {
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', 
-                             usernameVariable: 'DOCKER_USER', 
-                             passwordVariable: 'DOCKER_PASSWORD')]) {
-                            sh """
-                            /kaniko/executor \
-                            --dockerfile=Dockerfile \
-                            --context=`pwd` \
-                            --destination=index.docker.io/anas1243/solar-app:$SAFE_BRANCH_NAME-$SHORT_COMMIT
-                            --registry-mirror=index.docker.io
-                            """
-                            }        
+                    sh """
+                    /kaniko/executor \
+                    --dockerfile=Dockerfile \
+                    --context=`pwd` \
+                    --destination=index.docker.io/anas1243/solar-app:$SAFE_BRANCH_NAME-$SHORT_COMMIT
+                    --registry-mirror=index.docker.io
+                    """ 
                 }
             }
         }
