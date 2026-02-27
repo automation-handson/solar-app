@@ -14,9 +14,9 @@ spec:
       - sleep
     args:
     - 99d
-    volumeMounts:
-    - name: kaniko-secret
-      mountPath: /kaniko/.docker
+    # volumeMounts:
+    # - name: kaniko-secret
+    #   mountPath: /kaniko/.docker
   - name: git
     image: alpine/git:latest
     command:
@@ -31,7 +31,7 @@ spec:
     - 99d
     volumeMounts:
     - name: kaniko-secret
-      mountPath: /root/.docker    
+      mountPath: /root/.docker
   volumes:
   - name: kaniko-secret
     secret:
