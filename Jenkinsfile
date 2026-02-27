@@ -180,7 +180,7 @@ pipeline {
                             sh """
                             echo "Cloning the solar-gitops repository..."
                             git clone -b main https://${GITHUB_APP}:${GITHUB_ACCESS_TOKEN}@github.com/automation-handson/solar-gitops.git
-                            cd argocd/k8s-apps/${targetDir}/deployment
+                            cd solar-gitops/argocd/k8s-apps/${targetDir}/deployment
 
                             echo "Updating the image tag in solar-deployment.yaml... for the $BRANCH_NAME Environment"
                             sed -i "s|image: anas1243/solar-app:.*|image: anas1243/solar-app:$SAFE_BRANCH_NAME-$SHORT_COMMIT|" solar-deployment.yaml
