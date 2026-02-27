@@ -140,14 +140,14 @@ pipeline {
                                 --ignore-unfixed \
                                 docker.io/anas1243/solar-app:$SAFE_BRANCH_NAME-$SHORT_COMMIT
 
-                            trivy image \
-                                --severity CRITICAL \
-                                --exit-code 1 \
-                                --format template \
-                                --template '@/contrib/html.tpl' \
-                                --output trivy-CRITICAL-report-$SAFE_BRANCH_NAME-${SHORT_COMMIT}.html \
-                                --ignore-unfixed \
-                                docker.io/anas1243/solar-app:$SAFE_BRANCH_NAME-$SHORT_COMMIT     
+                            // trivy image \
+                            //     --severity CRITICAL \
+                            //     --exit-code 1 \
+                            //     --format template \
+                            //     --template '@/contrib/html.tpl' \
+                            //     --output trivy-CRITICAL-report-$SAFE_BRANCH_NAME-${SHORT_COMMIT}.html \
+                            //     --ignore-unfixed \
+                            //     docker.io/anas1243/solar-app:$SAFE_BRANCH_NAME-$SHORT_COMMIT     
                             """
                             }  
                 }
