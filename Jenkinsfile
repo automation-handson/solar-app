@@ -98,7 +98,8 @@ pipeline {
                             /kaniko/executor \
                             --dockerfile=Dockerfile \
                             --context=`pwd` \
-                            --destination=docker.io/anas1243/solar-app:$SAFE_BRANCH_NAME-$SHORT_COMMIT
+                            --destination=index.docker.io/anas1243/solar-app:$SAFE_BRANCH_NAME-$SHORT_COMMIT
+                            --registry-mirror=index.docker.io
                             """
                             }        
                 }
