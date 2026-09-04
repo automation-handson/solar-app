@@ -182,7 +182,7 @@ pipeline {
                             cd solar-gitops/argocd/k8s-apps/${targetDir}/deployment
 
                             echo "Updating the image tag in solar-deployment.yaml... for the $BRANCH_NAME Environment"
-                            sed -i -E 's|(image:\s*).*solar-app:.*|\1anas1243/solar-app:'"$SAFE_BRANCH_NAME-$SHORT_COMMIT"'|' solar-deployment.yaml
+                            sed -i -E 's|(image:\\s*).*solar-app:.*|\\1anas1243/solar-app:${SAFE_BRANCH_NAME}-${SHORT_COMMIT}|' solar-deployment.yaml
                             # sed -i "s|image: anas1243/solar-app:.*|image: anas1243/solar-app:$SAFE_BRANCH_NAME-$SHORT_COMMIT|" solar-deployment.yaml
                             git add solar-deployment.yaml
                             git commit -m "Update solar-app image tag to $SAFE_BRANCH_NAME-$SHORT_COMMIT"
